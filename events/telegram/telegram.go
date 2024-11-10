@@ -11,7 +11,7 @@ import (
 type Processor struct {
 	tg      *telegram.Client
 	offset  int
-	storage storage.Page
+	storage storage.Storage
 }
 
 type Meta struct {
@@ -24,7 +24,7 @@ var (
 	ErrUnknownMetaType  = errors.New("Unknown meta type")
 )
 
-func New(client *telegram.Client, storage storage.Page) *Processor {
+func New(client *telegram.Client, storage storage.Storage) *Processor {
 	return &Processor{
 		tg:      client,
 		storage: storage,
@@ -52,7 +52,7 @@ func (p *Processor) Fetch(limit int) ([]events.Event, error) {
 	return res, nil
 }
 
-func (p *Processor) Procces(event events.Event) error {
+func (p *Processor) Process(event events.Event) error {
 	switch event.Type {
 	case events.Message:
 		return p.processMassage(event)
