@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 	tgClient "tgBot/clients/telegram"
-	event_consumer "tgBot/consumer/event-consumer"
+	eventConsumer "tgBot/consumer/event-consumer"
 	"tgBot/events/telegram"
 	"tgBot/storage/files"
 )
@@ -23,7 +23,7 @@ func main() {
 
 	log.Print("service started")
 
-	consumer := event_consumer.New(eventsProcessor, eventsProcessor, batchSize)
+	consumer := eventConsumer.New(eventsProcessor, eventsProcessor, batchSize)
 
 	if err := consumer.Start(); err != nil {
 		log.Fatal("service is stopped", err)
@@ -32,7 +32,7 @@ func main() {
 
 func mustToken() string {
 	token := flag.String(
-		"token-bot-token",
+		"tg-bot-token",
 		"",
 		"token for access to telegram bot",
 	)

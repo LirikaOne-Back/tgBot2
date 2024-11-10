@@ -32,7 +32,7 @@ func (p *Processor) doCmd(text string, chatID int, username string) error {
 	case StartCmd:
 		return p.sendHello(chatID)
 	default:
-		return p.tg.SendMassage(chatID, msgUnknownCommand)
+		return p.tg.SendMessage(chatID, msgUnknownCommand)
 	}
 
 }
@@ -50,14 +50,14 @@ func (p *Processor) savePage(chatID int, pageURL string, username string) (err e
 		return err
 	}
 	if isExists {
-		return p.tg.SendMassage(chatID, msgAlreadyExists)
+		return p.tg.SendMessage(chatID, msgAlreadyExists)
 	}
 
 	if err = p.storage.Save(page); err != nil {
 		return err
 	}
 
-	if err = p.tg.SendMassage(chatID, msgSaved); err != nil {
+	if err = p.tg.SendMessage(chatID, msgSaved); err != nil {
 		return err
 	}
 
@@ -75,7 +75,7 @@ func (p *Processor) sendRandom(chatID int, username string) (err error) {
 		return p.tg.SendMessage(chatID, msgNoSavedPages)
 	}
 
-	if err = p.tg.SendMassage(chatID, page.URL); err != nil {
+	if err = p.tg.SendMessage(chatID, page.URL); err != nil {
 		return err
 	}
 
@@ -83,11 +83,11 @@ func (p *Processor) sendRandom(chatID int, username string) (err error) {
 }
 
 func (p *Processor) sendHelp(chatID int) error {
-	return p.tg.SendMassage(chatID, msgHelp)
+	return p.tg.SendMessage(chatID, msgHelp)
 }
 
 func (p *Processor) sendHello(chatID int) error {
-	return p.tg.SendMassage(chatID, msgHello)
+	return p.tg.SendMessage(chatID, msgHello)
 }
 
 func isAddCmd(text string) bool {
