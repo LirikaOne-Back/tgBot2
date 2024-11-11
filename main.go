@@ -17,18 +17,17 @@ const (
 )
 
 func main() {
-	//s := files.New(storagePath)
 	s, err := sqlite.New(sqliteStoragePath)
 	if err != nil {
-		log.Fatalf("can't connect to storage: ", err)
+		log.Fatalf("can't connect to storage: %v", err)
 	}
 
 	if err = s.Init(context.TODO()); err != nil {
-		log.Fatalf("can't init storage: ", err)
+		log.Fatalf("can't init storage: %v", err)
 	}
 
 	eventsProcessor := telegram.New(
-		tgClient.New(tgBotHost, mustToken()),
+		tgClient.New(mustTokenAndHost()),
 		s,
 	)
 
@@ -36,12 +35,18 @@ func main() {
 
 	consumer := eventConsumer.New(eventsProcessor, eventsProcessor, batchSize)
 
-	if err := consumer.Start(); err != nil {
+	if err = consumer.Start(); err != nil {
 		log.Fatal("service is stopped", err)
 	}
 }
 
-func mustToken() string {
+func mustTokenAndHost() (string, string) {
+	host := flag.String(
+		"tg-bot-host",
+		"",
+		"host for telegram bot",
+	)
+
 	token := flag.String(
 		"tg-bot-token",
 		"",
@@ -50,9 +55,13 @@ func mustToken() string {
 
 	flag.Parse()
 
+	if *host == "" {
+		log.Fatal("host is required")
+	}
+
 	if *token == "" {
 		log.Fatal("token is required")
 	}
 
-	return *token
+	return *host, *token
 }
