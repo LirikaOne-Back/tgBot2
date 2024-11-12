@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"tgBot/lib/e"
+	"time"
 )
 
 type Storage interface {
@@ -21,6 +22,7 @@ var ErrNoSaved = errors.New("no saved page")
 type Page struct {
 	URL      string
 	UserName string
+	Time     time.Time
 }
 
 func (p Page) Hash() (string, error) {

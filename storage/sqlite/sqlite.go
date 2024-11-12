@@ -27,9 +27,9 @@ func New(path string) (*Storage, error) {
 }
 
 func (s *Storage) Save(ctx context.Context, p *storage.Page) error {
-	q := `INSERT INTO pages (url, user_name) VALUES (?, ?)`
+	q := `INSERT INTO pages (url, user_name, created_at) VALUES (?, ?, ?)`
 
-	if _, err := s.db.ExecContext(ctx, q, p.URL, p.UserName); err != nil {
+	if _, err := s.db.ExecContext(ctx, q, p.URL, p.UserName, p.Time); err != nil {
 		return fmt.Errorf("can't insert page: %w", err)
 	}
 
@@ -37,7 +37,7 @@ func (s *Storage) Save(ctx context.Context, p *storage.Page) error {
 }
 
 func (s *Storage) PickRandom(ctx context.Context, userName string) (*storage.Page, error) {
-	q := `SELECT url FROM pages WHERE user_name = ? ORDER BY RANDOM() LIMIT 1`
+	q := `SELECT url FROM pages WHERE user_name = ? ORDER BY created_at ASC LIMIT 1`
 
 	var url string
 
@@ -78,7 +78,7 @@ func (s *Storage) IsExists(ctx context.Context, p *storage.Page) (bool, error) {
 }
 
 func (s *Storage) Init(ctx context.Context) error {
-	q := `CREATE TABLE IF NOT EXISTS pages (url TEXT, user_name TEXT)`
+	q := `CREATE TABLE IF NOT EXISTS pages (url TEXT, user_name TEXT, created_at TEXT)`
 
 	if _, err := s.db.ExecContext(ctx, q); err != nil {
 		return fmt.Errorf("can't create table: %w", err)
