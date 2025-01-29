@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	RndCmd   = "/rnd"
-	Help     = "/help"
-	StartCmd = "/start"
+	RndCmd       = "/rnd"
+	Help         = "/help"
+	StartCmd     = "/start"
+	RemoveRndCmd = "/remove"
 )
 
 func (p *Processor) doCmd(text string, chatID int, username string) error {
@@ -28,6 +29,8 @@ func (p *Processor) doCmd(text string, chatID int, username string) error {
 	switch text {
 	case RndCmd:
 		return p.sendRandom(chatID, username)
+	case RemoveRndCmd:
+		return p.remove(chatID, username)
 	case Help:
 		return p.sendHelp(chatID)
 	case StartCmd:
@@ -63,6 +66,24 @@ func (p *Processor) savePage(chatID int, pageURL string, username string) (err e
 	}
 
 	return nil
+}
+
+func (p *Processor) remove(chatID int, username string) (err error) {
+	defer func() { err = e.WrapIfErr("can't do command: remove", err) }()
+
+	page, err := p.storage.PickRandom(context.Background(), username)
+	if err != nil && !errors.Is(err, storage.ErrNoSaved) {
+		return err
+	}
+	if errors.Is(err, storage.ErrNoSaved) {
+		return p.tg.SendMessage(chatID, msgNoRemove)
+	}
+
+	if err = p.tg.SendMessage(chatID, msgRemove); err != nil {
+		return err
+	}
+
+	return p.storage.Remove(context.Background(), page)
 }
 
 func (p *Processor) sendRandom(chatID int, username string) (err error) {
