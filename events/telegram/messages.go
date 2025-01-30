@@ -16,4 +16,5 @@ const (
 	msgAlreadyExists  = "You have already have this page in your list 🤗"
 	msgRemove         = "Successfully deleted"
 	msgNoRemove       = "Unsuccessfully deleted"
+	msgGiveAll        = "Give all"
 )

@@ -4,9 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"tgBot/storage"
-
 	_ "github.com/mattn/go-sqlite3"
+	"tgBot/storage"
 )
 
 type Storage struct {
@@ -85,4 +84,39 @@ func (s *Storage) Init(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (s *Storage) GiveAll(ctx context.Context, userName string) (*[]storage.Page, error) {
+	q := `SELECT url FROM pages WHERE user_name = ? ORDER BY created_at ASC`
+
+	rows, err := s.db.QueryContext(ctx, q, userName)
+	if err != nil {
+		return nil, fmt.Errorf("can't get all pages: %w", err)
+	}
+	defer rows.Close()
+
+	var pages []storage.Page
+
+	for rows.Next() {
+		var url string
+
+		if err := rows.Scan(&url); err != nil {
+			return nil, fmt.Errorf("can't scan page: %w", err)
+		}
+
+		pages = append(pages, storage.Page{
+			URL:      url,
+			UserName: userName,
+		})
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	if len(pages) == 0 {
+		return nil, storage.ErrNoSaved
+	}
+
+	return &pages, nil
 }

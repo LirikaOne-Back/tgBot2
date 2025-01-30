@@ -15,6 +15,7 @@ const (
 	Help         = "/help"
 	StartCmd     = "/start"
 	RemoveRndCmd = "/remove"
+	GiveAllCmd   = "/give"
 )
 
 func (p *Processor) doCmd(text string, chatID int, username string) error {
@@ -27,6 +28,8 @@ func (p *Processor) doCmd(text string, chatID int, username string) error {
 	}
 
 	switch text {
+	case GiveAllCmd:
+		return p.sendAll(chatID, username)
 	case RndCmd:
 		return p.sendRandom(chatID, username)
 	case RemoveRndCmd:
@@ -39,6 +42,30 @@ func (p *Processor) doCmd(text string, chatID int, username string) error {
 		return p.tg.SendMessage(chatID, msgUnknownCommand)
 	}
 
+}
+
+func (p *Processor) sendAll(chatID int, username string) (err error) {
+	defer func() { err = e.WrapIfErr("can't do command: remove", err) }()
+
+	page, err := p.storage.GiveAll(context.Background(), username)
+	if err != nil && !errors.Is(err, storage.ErrNoSaved) {
+		return err
+	}
+	if errors.Is(err, storage.ErrNoSaved) {
+		return p.tg.SendMessage(chatID, msgNoSavedPages)
+	}
+
+	if err = p.tg.SendMessage(chatID, msgGiveAll); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(*page); i++ {
+		if err = p.tg.SendMessage(chatID, (*page)[i].URL); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (p *Processor) savePage(chatID int, pageURL string, username string) (err error) {

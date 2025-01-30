@@ -15,6 +15,7 @@ type Storage interface {
 	PickRandom(ctx context.Context, userName string) (*Page, error)
 	Remove(ctx context.Context, p *Page) error
 	IsExists(ctx context.Context, p *Page) (bool, error)
+	GiveAll(ctx context.Context, userName string) (*[]Page, error)
 }
 
 var ErrNoSaved = errors.New("no saved page")
